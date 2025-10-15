@@ -9,6 +9,7 @@
     "dev": "remix dev --manual",
     "start": "remix-serve ./build/index.js",
     "typecheck": "tsc",
+    "setup": "node scripts/dev-setup.js",
     "shopify": "shopify",
     "shopify:app": "shopify app",
     "shopify:app:dev": "shopify app dev",
