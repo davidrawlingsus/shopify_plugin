@@ -1,0 +1,23 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "survey-replay-app"
+client_id = "your-client-id"
+application_url = "https://your-app-url.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products,read_orders"
+
+[auth]
+redirect_urls = [
+  "https://your-app-url.com/auth/callback",
+  "https://your-app-url.com/auth/shopify/callback",
+  "https://your-app-url.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-10"
+
+[pos]
+embedded = false
