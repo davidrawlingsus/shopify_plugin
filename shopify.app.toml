@@ -1,23 +1,20 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "survey-replay-app"
-client_id = "your-client-id"
-application_url = "https://your-app-url.com"
+client_id = "0c954a7520faba8c292caf89d4602e75"
+name = "Marketably Insights"
+application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2026-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_orders"
+scopes = ""
 
 [auth]
-redirect_urls = [
-  "https://your-app-url.com/auth/callback",
-  "https://your-app-url.com/auth/shopify/callback",
-  "https://your-app-url.com/api/auth/callback"
-]
-
-[webhooks]
-api_version = "2023-10"
-
-[pos]
-embedded = false
+redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]

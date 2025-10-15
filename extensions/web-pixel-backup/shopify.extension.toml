@@ -1,0 +1,14 @@
+name = "session-replay-pixel"
+uid = "f1af6cec-5434-7491-6624-5ba80f4fa05d6d48a485"
+type = "web_pixel_extension"
+
+runtime_context = "strict"
+
+[targeting]
+target = ["purchase.thank-you-page", "purchase.order-status-page"]
+
+[settings]
+[[settings.fields]]
+key = "api_endpoint"
+type = "single_line_text_field"
+name = "API Endpoint"
