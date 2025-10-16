@@ -12,21 +12,28 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   try {
     const body = await request.json();
-    const { orderId, orderNumber, answers, sessionKey } = body;
+    const { orderId, orderNumber, rating, feedback, timestamp } = body;
 
     // Validate required fields
-    if (!orderId || !answers || !sessionKey) {
+    if (!orderId || !feedback) {
       return json({ error: "Missing required fields" }, { status: 400 });
     }
 
     // Extract shop domain from request headers or URL if available
     const shopDomain = request.headers.get('x-shopify-shop-domain') || 'unknown';
 
+    // Generate a session key for this submission
+    const sessionKey = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     // Store survey response
     const savedResponse = await surveyStore.saveSurveyResponse({
       orderId,
       orderNumber,
-      answers,
+      answers: {
+        feedback: feedback.trim(),
+        rating: rating, // Will be null for text-only surveys
+        timestamp: timestamp || new Date().toISOString()
+      },
       sessionKey,
       shopDomain
     });

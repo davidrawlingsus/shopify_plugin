@@ -4,6 +4,7 @@ client_id = "0c954a7520faba8c292caf89d4602e75"
 name = "Marketably Insights"
 application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
+type = "object"
 
 [build]
 automatically_update_urls_on_dev = true
@@ -14,7 +15,7 @@ api_version = "2026-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = ""
+scopes = "write_orders,read_orders"
 
 [auth]
 redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
