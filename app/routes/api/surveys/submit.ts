@@ -1,8 +1,10 @@
 import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "~/shopify.server";
+import { surveyStore } from "~/data/surveyStore";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+  // Note: This endpoint will be called from the checkout extension, not from admin
+  // So we might not always have admin authentication
   
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, { status: 405 });
@@ -17,22 +19,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // TODO: Store survey response in database
-    // This would typically save to your database (PostgreSQL via Prisma)
-    console.log("Survey submission received:", {
+    // Extract shop domain from request headers or URL if available
+    const shopDomain = request.headers.get('x-shopify-shop-domain') || 'unknown';
+
+    // Store survey response
+    const savedResponse = await surveyStore.saveSurveyResponse({
       orderId,
       orderNumber,
       answers,
       sessionKey,
-      timestamp: new Date().toISOString()
+      shopDomain
     });
 
-    // TODO: Link survey to session replay data
-    // This would query your database to associate the survey with the session recording
+    console.log("Survey submission received and saved:", savedResponse);
 
     return json({ 
       success: true, 
       message: "Survey submitted successfully",
+      surveyId: savedResponse.id,
       sessionKey 
     });
 

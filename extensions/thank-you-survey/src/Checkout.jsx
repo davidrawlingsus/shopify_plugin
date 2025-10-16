@@ -1,31 +1,50 @@
-import React, { useState } from "react";
+import '@shopify/ui-extensions/preact';
+import {render} from "preact";
+import { useState } from "preact/hooks";
 
-export default function ThankYouSurvey() {
-  const [answers, setAnswers] = useState({});
+// Export the extension
+export default async () => {
+  render(<ThankYouSurvey />, document.body)
+};
+
+function ThankYouSurvey() {
+  const [rating, setRating] = useState(null);
+  const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleAnswerChange = (questionId, value) => {
-    setAnswers(prev => ({
-      ...prev,
-      [questionId]: value
-    }));
+  const handleRatingClick = (value) => {
+    console.log('Rating clicked:', value);
+    setRating(value);
+    console.log('Rating updated to:', value);
   };
 
   const handleSubmit = async () => {
+    if (!rating) return;
+    
     setIsSubmitting(true);
     
     try {
-      // Simple survey submission
-      const sessionKey = window.sessionKey || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      console.log('Survey submitted:', {
-        answers,
-        sessionKey,
-        timestamp: new Date().toISOString()
+      // Submit to our API
+      const response = await fetch('/api/surveys/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating,
+          feedback,
+          orderId: shopify.environment.value.order?.id || 'unknown',
+          orderNumber: shopify.environment.value.order?.name || 'unknown',
+          timestamp: new Date().toISOString(),
+        }),
       });
 
-      setSubmitted(true);
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        console.error('Failed to submit survey');
+      }
     } catch (error) {
       console.error('Error submitting survey:', error);
     } finally {
@@ -33,99 +52,83 @@ export default function ThankYouSurvey() {
     }
   };
 
+  console.log('Current state:', { rating, feedback, isSubmitting, submitted });
+
   if (submitted) {
     return (
-      <div style={{ padding: '16px', backgroundColor: '#f0f8f0', border: '1px solid #4caf50', borderRadius: '4px', margin: '16px 0' }}>
-        <p style={{ margin: 0, color: '#2e7d32' }}>
-          ✅ Thank you for your feedback! We appreciate you taking the time to help us improve.
-        </p>
-      </div>
+      <s-banner heading="Thank you!" tone="success">
+        <s-text>Your feedback has been received. We appreciate your input!</s-text>
+      </s-banner>
     );
   }
 
   return (
-    <div style={{ 
-      padding: '20px', 
-      border: '1px solid #e0e0e0', 
-      borderRadius: '8px', 
-      margin: '16px 0',
-      backgroundColor: '#fafafa'
-    }}>
-      <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 'bold' }}>
-        📝 How was your checkout experience?
-      </h3>
-      
-      <p style={{ margin: '0 0 16px 0', color: '#666' }}>
-        Help us improve your shopping experience by sharing your feedback.
-      </p>
+    <s-banner heading="📝 How was your checkout experience?">
+      <s-stack gap="base">
+        <s-text>
+          Please rate your checkout experience to help us improve:
+        </s-text>
+        
+        <s-stack gap="tight" direction="row">
+          <s-button
+            onClick={() => handleRatingClick(1)}
+            variant={rating === 1 ? "primary" : "secondary"}
+            size="small"
+          >
+            ⭐ 1
+          </s-button>
+          <s-button
+            onClick={() => handleRatingClick(2)}
+            variant={rating === 2 ? "primary" : "secondary"}
+            size="small"
+          >
+            ⭐ 2
+          </s-button>
+          <s-button
+            onClick={() => handleRatingClick(3)}
+            variant={rating === 3 ? "primary" : "secondary"}
+            size="small"
+          >
+            ⭐ 3
+          </s-button>
+          <s-button
+            onClick={() => handleRatingClick(4)}
+            variant={rating === 4 ? "primary" : "secondary"}
+            size="small"
+          >
+            ⭐ 4
+          </s-button>
+          <s-button
+            onClick={() => handleRatingClick(5)}
+            variant={rating === 5 ? "primary" : "secondary"}
+            size="small"
+          >
+            ⭐ 5
+          </s-button>
+        </s-stack>
 
-      {/* Rating Question */}
-      <div style={{ marginBottom: '16px' }}>
-        <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>
-          How satisfied are you with your checkout experience?
-        </p>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {[1, 2, 3, 4, 5].map((rating) => (
-            <button
-              key={rating}
-              onClick={() => handleAnswerChange('satisfaction', rating)}
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                border: answers.satisfaction === rating ? '2px solid #007ace' : '1px solid #ccc',
-                backgroundColor: answers.satisfaction === rating ? '#007ace' : '#fff',
-                color: answers.satisfaction === rating ? '#fff' : '#333',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }}
+        <s-text>Debug: Rating is {rating ? rating : 'not set'}</s-text>
+        <s-text>Debug: State object: {JSON.stringify({rating, feedback, isSubmitting, submitted})}</s-text>
+
+        {rating && (
+          <s-stack gap="tight">
+            <s-text>Additional feedback (optional):</s-text>
+            <s-textarea
+              value={feedback}
+              onInput={(e) => setFeedback(e.target.value)}
+              placeholder="Tell us more about your experience..."
+              rows="3"
+            />
+            <s-button
+              onClick={handleSubmit}
+              loading={isSubmitting}
+              disabled={isSubmitting}
             >
-              {rating}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Feedback Question */}
-      <div style={{ marginBottom: '16px' }}>
-        <p style={{ margin: '0 0 8px 0', fontWeight: '500' }}>
-          Any additional feedback?
-        </p>
-        <textarea
-          value={answers.feedback || ""}
-          onChange={(e) => handleAnswerChange('feedback', e.target.value)}
-          placeholder="Share your thoughts..."
-          style={{
-            width: '100%',
-            minHeight: '80px',
-            padding: '8px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            fontSize: '14px',
-            fontFamily: 'inherit',
-            resize: 'vertical'
-          }}
-        />
-      </div>
-
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        style={{
-          backgroundColor: '#007ace',
-          color: 'white',
-          border: 'none',
-          padding: '12px 24px',
-          borderRadius: '4px',
-          fontSize: '16px',
-          fontWeight: '500',
-          cursor: isSubmitting ? 'not-allowed' : 'pointer',
-          opacity: isSubmitting ? 0.6 : 1
-        }}
-      >
-        {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
-      </button>
-    </div>
+              Submit Feedback
+            </s-button>
+          </s-stack>
+        )}
+      </s-stack>
+    </s-banner>
   );
 }
